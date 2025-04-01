@@ -1,0 +1,18 @@
+{
+    "scopeName": "source.aol",
+    "name": "AOL",
+    "patterns": [
+      {
+        "match": "\\b(int|char|string|float|var)\\b",
+        "name": "storage.type.aol"
+      },
+      {
+        "match": "\\b(if|else|while|return)\\b",
+        "name": "keyword.control.aol"
+      },
+      {
+        "match": "\"(?:[^\"\\\\]|\\\\.)*\"",
+        "name": "string.quoted.double.aol"
+      }
+    ]
+  }
