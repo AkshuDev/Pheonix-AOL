@@ -1,2 +1,2 @@
-# Pheonix-AOL
+# AOL
 Assembly Orientated Language / Aftergreat OS Language
