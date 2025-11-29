@@ -1,0 +1,14 @@
+{
+    "Name": "AOL",
+    "Description": "Aftergreat Operating Language",
+    "Readme": "README.md",
+    "License": "LICENSE",
+    "Binaries": [
+        {
+            "Name": "aol",
+            "Os": ["linux"],
+            "Arch": ["x86_64"],
+            "Path": "AOL/dist/aol/aol_linux_x86_64"
+        }
+    ]
+}

@@ -3,8 +3,11 @@
 
 ArgParser::ArgParser(std::string programName) : program(std::move(programName)) {}
 
-void ArgParser::addOption(const std::string& shortName, const std::string& longName, const std::string& description, bool requiresValue) {
-    options.push_back({shortName, longName, description, requiresValue, false, std::nullopt});
+void ArgParser::addOption(const std::string& shortName, const std::string& longName, const std::string& description, bool requiresValue, bool required) {
+    options.push_back({shortName, longName, description, requiresValue, required, false, std::nullopt});
+    if (required) {
+        required_options.push_back({shortName, longName, description, requiresValue, required, false, std::nullopt});
+    }
 }
 
 ArgParser::Option* ArgParser::find(const std::string& name) {
@@ -44,6 +47,13 @@ bool ArgParser::parse(int argc, char** argv, bool& showHelp) {
             }
         } else {
             positionalArgs.push_back(arg);
+        }
+    }
+
+    for (const auto& opt: required_options) {
+        if (!has(opt.shortName)) {
+            std::cerr << Color::Red << "Error: Missing Required Option '" << opt.shortName << "'" << Color::Reset << "\n";
+            return false;
         }
     }
 

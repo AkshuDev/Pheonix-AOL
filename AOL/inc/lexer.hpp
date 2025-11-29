@@ -80,6 +80,8 @@ enum class TokenType {
     AndAnd,
     OrOr,
     Bang,
+    BangEqual,
+    EqualEqual,
     Amp,
     AmpAssign,
     Pipe,

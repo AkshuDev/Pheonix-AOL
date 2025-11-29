@@ -112,7 +112,7 @@ Token AOL_Lexer::operatorOrDelimiter() {
 
     // Multi-char operators first
     if (c == '-' && match('>')) return {TokenType::Arrow, "->", line, startCol};
-    if (c == '=' && match('=')) return {TokenType::Equal, "==", line, startCol};
+    if (c == '=' && match('=')) return {TokenType::EqualEqual, "==", line, startCol};
     if (c == '!' && match('=')) return {TokenType::NEqual, "!=", line, startCol};
     if (c == '<' && match('=')) return {TokenType::LessEqual, "<=", line, startCol};
     if (c == '>' && match('=')) return {TokenType::GreaterEqual, ">=", line, startCol};
@@ -129,6 +129,7 @@ Token AOL_Lexer::operatorOrDelimiter() {
         case '}': return {TokenType::RBrace, "}", line, startCol};
         case ';': return {TokenType::Semicolon, ";", line, startCol};
         case ',': return {TokenType::Comma, ",", line, startCol};
+        case '!': return {TokenType::Bang, "!", line, startCol};
     }
     return {TokenType::Unknown, std::string(1,c), line, startCol};
 }

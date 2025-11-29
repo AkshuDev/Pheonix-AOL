@@ -25,11 +25,14 @@ enum class ASTNodeType {
     CallExpr,
 };
 
+struct ASTNode;
+
 struct ASTNode {
     ASTNodeType type;
     std::string name; // variable, function name, or operator
     std::string value; // literal value
     std::vector<std::shared_ptr<ASTNode>> children;
+    std::vector<std::shared_ptr<ASTNode>> params; // Only for functions!
     int line = 0;
     int col = 0;
 

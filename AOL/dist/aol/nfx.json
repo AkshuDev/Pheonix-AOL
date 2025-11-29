@@ -21,26 +21,3 @@
 		}
 	]
 }
-{
-	"Name": "aol",
-	"Binaries": [
-		{
-			"Os": ["linux"],
-			"Arch": ["x86_64"],
-			"Path": "aol_linux_x86_64",
-			"Name": "aol"
-		},
-		{
-			"Os": ["windows"],
-			"Arch": ["x86_64"],
-			"Path": "aol_windows_x86_64.exe",
-			"Name": "aol"
-		},
-		{
-			"Os": ["macos"],
-			"Arch": ["arm64"],
-			"Path": "aol_macos_arm64",
-			"Name": "aol"
-		}
-	]
-}

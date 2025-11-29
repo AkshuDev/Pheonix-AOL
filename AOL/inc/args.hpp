@@ -12,13 +12,14 @@ public:
         std::string longName;
         std::string description;
         bool requiresValue = false;
+        bool required = false;
         bool found = false;
         std::optional<std::string> value;
     };
 
     ArgParser(std::string programName);
 
-    void addOption(const std::string& shortName, const std::string& longName, const std::string& description, bool requiresValue = false);
+    void addOption(const std::string& shortName, const std::string& longName, const std::string& description, bool requiresValue = false, bool required = false);
 
     bool parse(int argc, char** argv, bool& showHelp);
 
@@ -31,6 +32,7 @@ public:
 private:
     std::string program;
     std::vector<Option> options;
+    std::vector<Option> required_options;
     std::vector<std::string> positionalArgs;
 
     Option* find(const std::string& name);

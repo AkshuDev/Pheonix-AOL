@@ -52,6 +52,7 @@ build/%.o: src/%.cpp
 
 # Generate NFX metadata file
 gen-nfx:
+	@rm -rf dist/aol/nfx.json
 	@echo "Generating nfx.json..."
 	@echo '{'                                                        >> dist/aol/nfx.json
 	@echo '	"Name": "aol",'                                          >> dist/aol/nfx.json
