@@ -130,6 +130,7 @@ Token AOL_Lexer::operatorOrDelimiter() {
         case ';': return {TokenType::Semicolon, ";", line, startCol};
         case ',': return {TokenType::Comma, ",", line, startCol};
         case '!': return {TokenType::Bang, "!", line, startCol};
+        case '=': return {TokenType::Equal, "=", line, startCol};
     }
     return {TokenType::Unknown, std::string(1,c), line, startCol};
 }

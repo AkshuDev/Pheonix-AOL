@@ -8,7 +8,19 @@ std::string Compiler_Amd64::compile(const std::shared_ptr<ASTNode>& program) {
     if (!program) {
         return "";
     }
-    return compileProgram(program);
+    std::ostringstream out;
+    std::ostringstream tsec;
+
+    bss << ":section .bss\n:align 8\n";
+    data << ":section .data\n:align 8\n";
+    rodata << ":section .rodata\n:align 8\n";
+
+    tsec << compileProgram(program);
+    out << rodata.str();
+    out << data.str();
+    out << bss.str();
+    out << tsec.str();
+    return out.str();
 }
 
 std::string Compiler_Amd64::compileProgram(const std::shared_ptr<ASTNode>& node) {
@@ -20,7 +32,7 @@ std::string Compiler_Amd64::compileProgram(const std::shared_ptr<ASTNode>& node)
     out << "\tcall $main\n";
 
     for (auto& child : node->children)
-        out << compileStatement(child);
+        out << compileStatement(child, "%rax");
 
     return out.str();
 }
@@ -51,14 +63,31 @@ std::string Compiler_Amd64::compileFunction(const std::shared_ptr<ASTNode>& node
     currentFunction = &func;
     localOffset = 0;
 
+    if (node->params.size() > 0) {
+        // Params
+        int offset = 0;
+        for (auto& param : node->params) {
+            func.params.push_back(
+                (VariableInfo){
+                    .name = param->name,
+                    .offset = offset,
+                    .size = 8 // Default
+                }
+            );
+            func.stackSize += 8;
+        }
+    }
+
     functions[func.name] = func;
 
     out << ".func " << node->name << "\n";
+    out << "\tpush %rbp\n\tpush 0\n\tmov %rbp, %rsp\n";
 
     // Compile all statements in the function
     for (auto& stmt : node->children)
-        out << "\t" << compileStatement(stmt);
+        out << "\t" << compileStatement(stmt, "%rax");
 
+    out << "\tpop %rbx\n\tpop %rbp\n";
     out << "\tret\n.endfunc\n\n";
 
     currentFunction = nullptr;
@@ -86,7 +115,7 @@ std::string Compiler_Amd64::compileVariableDecl(const std::shared_ptr<ASTNode>& 
 std::string Compiler_Amd64::compileReturn(const std::shared_ptr<ASTNode>& node, const std::string& targetReg) {
     std::ostringstream out;
     if (!node->children.empty()) {
-        out << "\tmov %rax, " << compileExpression(node->children[0], "%rax") << "\n";
+        out << compileExpression(node->children[0], targetReg) << "\n";
     }
     out << "\tret\n";
     return out.str();
@@ -168,9 +197,7 @@ std::string Compiler_Amd64::compileExpression(const std::shared_ptr<ASTNode>& no
 
 std::string Compiler_Amd64::compileBinaryExpr(const std::shared_ptr<ASTNode>& node, const std::string& targetReg) {
     std::ostringstream out;
-    out << compileExpression(node->children[0], targetReg) << " "
-        << node->name << " "
-        << compileExpression(node->children[1], targetReg);
+    out << compileExpression(node->children[0], targetReg) << " " << node->name << " " << compileExpression(node->children[1], targetReg);
     return out.str();
 }
 
@@ -185,6 +212,7 @@ std::string Compiler_Amd64::compileLiteral(const std::shared_ptr<ASTNode>& node)
 std::string Compiler_Amd64::compileIdentifier(const std::shared_ptr<ASTNode>& node, const std::string& targetReg) {
     // Find variable in locals or parameters
     if (!currentFunction) return node->name;
+    (void)targetReg;
 
     for (auto& var : currentFunction->locals)
         if (var.name == node->name)

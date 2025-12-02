@@ -13,6 +13,7 @@ enum class ASTNodeType {
     ConstDecl,
     ReturnStmt,
     IfStmt,
+    StmtBlock,
     WhileStmt,
     ForStmt,
     BreakStmt,
@@ -23,6 +24,7 @@ enum class ASTNodeType {
     Literal,
     Identifier,
     CallExpr,
+    Error,
 };
 
 struct ASTNode;
@@ -36,7 +38,7 @@ struct ASTNode {
     int line = 0;
     int col = 0;
 
-    ASTNode(ASTNodeType t, int l=0, int c=0) : type(t), line(l), col(c) {}
+    ASTNode(ASTNodeType t, int l=0, int c=0, const std::string& n = "") : type(t), name(n), line(l), col(c) {}
 };
 
 class AOL_Parser {

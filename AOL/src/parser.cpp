@@ -96,7 +96,7 @@ std::shared_ptr<ASTNode> AOL_Parser::parseBinaryOp(int minPrecedence) {
         int p = precedence(op.type);
         if (p < minPrecedence || p == 0) break;
         advance();
-        int nextMin = p + 1;
+        int nextMin = p;
         auto right = parseBinaryOp(nextMin);
         auto node = std::make_shared<ASTNode>(ASTNodeType::BinaryExpr, op.line, op.col);
         node->name = op.text;
@@ -134,13 +134,40 @@ std::shared_ptr<ASTNode> AOL_Parser::parsePrimary() {
     if (t.type == TokenType::LParen) {
         advance();
         auto expr = parseExpression();
-        expect(TokenType::RParen, "expected ')'");
+        expect(TokenType::RParen, "Expected ')'");
         return expr;
+    }
+    if (t.type == TokenType::Semicolon) {
     }
     advance();
     auto node = std::make_shared<ASTNode>(ASTNodeType::Literal, t.line, t.col);
     node->value = t.text;
     return node;
+
+    switch (t.type) {
+        case TokenType::Identifier: {
+            advance();
+            return parseCallExpr(std::make_shared<ASTNode>(ASTNodeType::Identifier, t.line, t.col, t.text));
+        }
+        case TokenType::IntegerLiteral:
+        case TokenType::StringLiteral: {
+            Token lit = advance();
+            auto node = std::make_shared<ASTNode>(ASTNodeType::Literal, t.line, t.col);
+            node->value = lit.text;
+            return node;
+        }
+        case TokenType::LParen: {
+            advance();
+            auto expr = parseExpression();
+            expect(TokenType::RParen, "Expected ')'");
+            return expr;
+        }
+        default: {
+            std::cerr << "Unexpected token in expression!\n";
+            advance();
+            return std::make_shared<ASTNode>(ASTNodeType::Error, t.line, t.col);
+        }
+    }
 }
 
 std::shared_ptr<ASTNode> AOL_Parser::parseLiteral() {
@@ -160,19 +187,19 @@ std::shared_ptr<ASTNode> AOL_Parser::parseIdentifier() {
 std::shared_ptr<ASTNode> AOL_Parser::parseCallExpr(std::shared_ptr<ASTNode> callee) {
     if (!match(TokenType::LParen)) return callee;
     auto call = std::make_shared<ASTNode>(ASTNodeType::CallExpr, callee->line, callee->col);
-    call->children.push_back(callee);
+    call->name = callee->name;
     if (!match(TokenType::RParen)) {
         for (;;) {
             call->children.push_back(parseExpression());
             if (match(TokenType::RParen)) break;
-            expect(TokenType::Comma, "expected ','");
+            expect(TokenType::Comma, "Expected ','");
         }
     }
     return call;
 }
 
 std::shared_ptr<ASTNode> AOL_Parser::parseFunction() {
-    expect(TokenType::Function, "expected 'fn'");
+    expect(TokenType::Function, "Expected 'fn'");
     Token nameToken = advance();
     if (nameToken.type != TokenType::Identifier) {
         std::cerr << Color::Red << "Expected function name at " 
@@ -183,13 +210,12 @@ std::shared_ptr<ASTNode> AOL_Parser::parseFunction() {
     auto node = std::make_shared<ASTNode>(ASTNodeType::FunctionDecl, nameToken.line, nameToken.col);
     node->name = nameToken.text;
 
-    expect(TokenType::LParen, "expected '(' after function name");
+    expect(TokenType::LParen, "Expected '(' after function name");
 
     while (peek().type != TokenType::RParen && !isAtEnd()) {
         Token paramToken = advance();
         if (paramToken.type != TokenType::Identifier) {
-            std::cerr << Color::Red << "Expected parameter name at "
-                      << paramToken.line << ":" << paramToken.col << "\n";
+            std::cerr << Color::Red << "Expected parameter name at " << paramToken.line << ":" << paramToken.col << "\n";
             break;
         }
 
@@ -200,7 +226,7 @@ std::shared_ptr<ASTNode> AOL_Parser::parseFunction() {
         if (!match(TokenType::Comma)) break;
     }
 
-    expect(TokenType::RParen, "expected ')' after parameters");
+    expect(TokenType::RParen, "Expected ')' after parameters");
 
     if (!match(TokenType::LBrace)) {
         std::cerr << Color::Red << "Expected '{' to start function body at " 
@@ -218,22 +244,19 @@ std::shared_ptr<ASTNode> AOL_Parser::parseFunction() {
 std::shared_ptr<ASTNode> AOL_Parser::parseVariableDecl() {
     Token declToken = advance(); // var, let, or const
     auto node = std::make_shared<ASTNode>(ASTNodeType::VariableDecl, declToken.line, declToken.col);
-    node->name = declToken.text;
 
     Token nameToken = advance();
     if (nameToken.type != TokenType::Identifier) {
         std::cerr << Color::Red << "Expected variable name at " << nameToken.line << ":" << nameToken.col << "\n";
         return node;
     }
-    auto varNode = std::make_shared<ASTNode>(ASTNodeType::Identifier, nameToken.line, nameToken.col);
-    varNode->name = nameToken.text;
-    node->children.push_back(varNode);
+    node->name = nameToken.text; 
 
     if (match(TokenType::Equal)) {
         node->children.push_back(parseExpression());
     }
 
-    advance(); // ';' 
+    expect(TokenType::Semicolon, "Expected ';' after variable declaration!");
     return node;
 }
 
@@ -245,7 +268,7 @@ std::shared_ptr<ASTNode> AOL_Parser::parseReturn() {
         node->children.push_back(parseExpression());
     }
 
-    match(TokenType::Semicolon);
+    expect(TokenType::Semicolon, "Expected ';'");
     return node;
 }
 
@@ -253,9 +276,9 @@ std::shared_ptr<ASTNode> AOL_Parser::parseIf() {
     Token ifToken = advance(); // 'if'
     auto node = std::make_shared<ASTNode>(ASTNodeType::IfStmt, ifToken.line, ifToken.col);
 
-    expect(TokenType::LParen, "expected '(' after 'if'");
+    expect(TokenType::LParen, "Expected '(' after 'if'");
     node->children.push_back(parseExpression()); // condition
-    expect(TokenType::RParen, "expected ')' after condition");
+    expect(TokenType::RParen, "Expected ')' after condition");
 
     if (match(TokenType::LBrace)) {
         while (!match(TokenType::RBrace) && !isAtEnd()) {
@@ -267,7 +290,7 @@ std::shared_ptr<ASTNode> AOL_Parser::parseIf() {
 
     if (match(TokenType::Else)) {
         if (match(TokenType::LBrace)) {
-            auto elseNode = std::make_shared<ASTNode>(ASTNodeType::IfStmt, peek().line, peek().col);
+            auto elseNode = std::make_shared<ASTNode>(ASTNodeType::StmtBlock, peek().line, peek().col);
             while (!match(TokenType::RBrace) && !isAtEnd()) {
                 elseNode->children.push_back(parseStatement());
             }
@@ -284,9 +307,9 @@ std::shared_ptr<ASTNode> AOL_Parser::parseWhile() {
     Token whileToken = advance(); // 'while'
     auto node = std::make_shared<ASTNode>(ASTNodeType::WhileStmt, whileToken.line, whileToken.col);
 
-    expect(TokenType::LParen, "expected '(' after 'while'");
+    expect(TokenType::LParen, "Expected '(' after 'while'");
     node->children.push_back(parseExpression()); // condition
-    expect(TokenType::RParen, "expected ')' after condition");
+    expect(TokenType::RParen, "Expected ')' after condition");
 
     if (match(TokenType::LBrace)) {
         while (!match(TokenType::RBrace) && !isAtEnd()) {
@@ -303,20 +326,24 @@ std::shared_ptr<ASTNode> AOL_Parser::parseFor() {
     Token forToken = advance(); // 'for'
     auto node = std::make_shared<ASTNode>(ASTNodeType::ForStmt, forToken.line, forToken.col);
 
-    expect(TokenType::LParen, "expected '(' after 'for'");
+    expect(TokenType::LParen, "Expected '(' after 'for'");
 
-    if (peek().type != TokenType::Semicolon)
-        node->children.push_back(parseStatement());
-    else
-        advance();
+    if (peek().type != TokenType::Semicolon) {
+        if (peek().type == TokenType::VarDecl || peek().type == TokenType::ConstDecl || peek().type == TokenType::Let) {
+            node->children.push_back(parseVariableDecl());
+        } else {
+            node->children.push_back(parseExpression());
+        }
+    }
+    expect(TokenType::Semicolon, "Expected, ';'");
 
     if (peek().type != TokenType::Semicolon)
         node->children.push_back(parseExpression());
-    expect(TokenType::Semicolon, "expected ';' in for loop");
+    expect(TokenType::Semicolon, "Expected ';'");
 
     if (peek().type != TokenType::RParen)
         node->children.push_back(parseExpression());
-    expect(TokenType::RParen, "expected ')' after for clauses");
+    expect(TokenType::RParen, "Expected ')'");
 
     if (match(TokenType::LBrace)) {
         while (!match(TokenType::RBrace) && !isAtEnd()) {

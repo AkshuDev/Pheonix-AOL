@@ -1,6 +1,6 @@
 # === Compiler Settings ===
 CXX := clang++
-CXXFLAGS := -std=c++20 -Wall -Wextra -Iinclude
+CXXFLAGS := -std=c++20 -Wall -Wextra -Iinclude -fsanitize=address -fno-omit-frame-pointer
 
 # Build modes
 DEBUG_FLAGS := -g -O0 -I inc
@@ -45,7 +45,7 @@ build:
 	@mkdir -p dist/aol
 
 $(TARGET): $(OBJ)
-	$(CXX) $(OBJ) -o $(TARGET)
+	$(CXX) $(OBJ) -o $(TARGET) -fsanitize=address
 
 build/%.o: src/%.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@

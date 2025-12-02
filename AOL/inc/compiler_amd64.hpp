@@ -5,6 +5,8 @@
 #include <vector>
 #include <unordered_map>
 #include <parser.hpp>
+#include <sstream>
+#include <iosfwd>
 
 struct VariableInfo {
     std::string name;
@@ -51,4 +53,7 @@ private:
     std::unordered_map<std::string, FunctionSymbol> functions;
     FunctionSymbol* currentFunction;
     int localOffset; // current stack offset for locals
+    std::ostringstream bss;
+    std::ostringstream data;
+    std::ostringstream rodata;
 };
