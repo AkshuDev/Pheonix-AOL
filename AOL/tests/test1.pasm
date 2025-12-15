@@ -1,24 +1,30 @@
+	:align 8
 :section .rodata
-:align 8
+	__aol_entry_dbg!ubyte[] = "DBG: Entry!", 10
+	str_0!ubyte[] = "Hello World!"
+	:align 8
 :section .data
-:align 8
+	:align 8
 :section .bss
-:align 8
+	:align 16
 :section .text
-:align 16
-:global __aol_main__
+	:global __aol_main__
 
 __aol_main__:
-	mov %rax, %rsp
-	mov %rbx, %rdi
-	call $main
-.func main
-	push %rbp
-	push 0
-	mov %rbp, %rsp
-		mov [%rbp - 8], 55
-	pop %rbx
-	pop %rbp
+	mov %rdi, %rsp
+	mov %rsi, %rdi
+	lea %rdi, [__aol_entry_dbg]
+	mov %rsi, 12
+	call __aol_print
+	jmp __aol_exit
 	ret
-.endfunc
-
+__aol_exit:
+    mov %rax, 60
+    syscall
+__aol_print:
+	mov %rsi, %rdi
+	mov %rdx, %rsi
+	mov %rax, 1
+	mov %rdi, 1
+	syscall
+	ret

@@ -9,7 +9,7 @@ static inline std::unordered_map<std::string, TokenType> KeywordMap = {
     {"let", TokenType::VarDecl},
     {"const", TokenType::ConstDecl},
     {"var", TokenType::VarDecl},
-    {"return", TokenType::Return},
+    {"ret", TokenType::Return},
     {"if", TokenType::If},
     {"else", TokenType::Else},
     {"while", TokenType::While},

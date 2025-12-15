@@ -195,6 +195,7 @@ std::shared_ptr<ASTNode> AOL_Parser::parseCallExpr(std::shared_ptr<ASTNode> call
             expect(TokenType::Comma, "Expected ','");
         }
     }
+    expect(TokenType::Semicolon, "Expected ';");
     return call;
 }
 

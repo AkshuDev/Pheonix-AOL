@@ -1,3 +1,13 @@
+fn nextfunc() {
+    let str = "Hello World!";
+    if (str) {
+        ret str;
+    } else {
+        ret "";
+    }
+}
+
 fn main() {
     let a = 55;
+    nextfunc();
 }

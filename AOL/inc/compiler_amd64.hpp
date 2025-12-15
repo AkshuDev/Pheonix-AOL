@@ -12,6 +12,7 @@ struct VariableInfo {
     std::string name;
     int offset; // relative to rbp
     int size; // in bytes
+    std::string reg; // register
 };
 
 struct FunctionSymbol {
@@ -56,4 +57,6 @@ private:
     std::ostringstream bss;
     std::ostringstream data;
     std::ostringstream rodata;
+
+    int str_idx;
 };
