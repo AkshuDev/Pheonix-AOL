@@ -8,6 +8,5 @@ fn nextfunc() {
 }
 
 fn main() {
-    let a = 55;
-    nextfunc();
+	let b = 5;
 }

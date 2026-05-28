@@ -39,8 +39,7 @@ bool AOL_Parser::match(const std::vector<TokenType>& types) {
 
 void AOL_Parser::expect(TokenType type, const std::string& errMsg) {
     if (!match(type)) {
-        std::cerr << Color::Red << "Parse Error at " << peek().line << ":" << peek().col
-                  << ": " << errMsg << "\n";
+        std::cerr << Color::Red << "Parse Error at " << peek().line << ":" << peek().col << ": " << errMsg << Color::Reset << "\n";
     }
 }
 
@@ -203,8 +202,7 @@ std::shared_ptr<ASTNode> AOL_Parser::parseFunction() {
     expect(TokenType::Function, "Expected 'fn'");
     Token nameToken = advance();
     if (nameToken.type != TokenType::Identifier) {
-        std::cerr << Color::Red << "Expected function name at " 
-                  << nameToken.line << ":" << nameToken.col << "\n";
+        std::cerr << Color::Red << "Expected function name at " << nameToken.line << ":" << nameToken.col << Color::Reset << "\n";
         return std::make_shared<ASTNode>(ASTNodeType::FunctionDecl, nameToken.line, nameToken.col);
     }
 
@@ -216,7 +214,7 @@ std::shared_ptr<ASTNode> AOL_Parser::parseFunction() {
     while (peek().type != TokenType::RParen && !isAtEnd()) {
         Token paramToken = advance();
         if (paramToken.type != TokenType::Identifier) {
-            std::cerr << Color::Red << "Expected parameter name at " << paramToken.line << ":" << paramToken.col << "\n";
+            std::cerr << Color::Red << "Expected parameter name at " << paramToken.line << ":" << paramToken.col << Color::Reset << "\n";
             break;
         }
 
@@ -230,8 +228,7 @@ std::shared_ptr<ASTNode> AOL_Parser::parseFunction() {
     expect(TokenType::RParen, "Expected ')' after parameters");
 
     if (!match(TokenType::LBrace)) {
-        std::cerr << Color::Red << "Expected '{' to start function body at " 
-                  << peek().line << ":" << peek().col << "\n";
+        std::cerr << Color::Red << "Expected '{' to start function body at " << peek().line << ":" << peek().col << Color::Reset << "\n";
         return node;
     }
 
@@ -248,7 +245,7 @@ std::shared_ptr<ASTNode> AOL_Parser::parseVariableDecl() {
 
     Token nameToken = advance();
     if (nameToken.type != TokenType::Identifier) {
-        std::cerr << Color::Red << "Expected variable name at " << nameToken.line << ":" << nameToken.col << "\n";
+        std::cerr << Color::Red << "Expected variable name at " << nameToken.line << ":" << nameToken.col << Color::Reset << "\n";
         return node;
     }
     node->name = nameToken.text; 

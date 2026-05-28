@@ -36,7 +36,7 @@ endif
 
 # === Rules ===
 
-all: build $(TARGET) gen-nfx
+all: build $(TARGET)
 	@echo "Build complete ("$(MODE)") -> $(TARGET)"
 
 build:
@@ -49,34 +49,6 @@ $(TARGET): $(OBJ)
 
 build/%.o: src/%.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
-
-# Generate NFX metadata file
-gen-nfx:
-	@rm -rf dist/aol/nfx.json
-	@echo "Generating nfx.json..."
-	@echo '{'                                                        >> dist/aol/nfx.json
-	@echo '	"Name": "aol",'                                          >> dist/aol/nfx.json
-	@echo '	"Binaries": ['                                           >> dist/aol/nfx.json
-	@echo '		{'                                                   >> dist/aol/nfx.json
-	@echo '			"Os": ["linux"],'                                >> dist/aol/nfx.json
-	@echo '			"Arch": ["x86_64"],'                             >> dist/aol/nfx.json
-	@echo '			"Path": "aol_linux_x86_64",'                     >> dist/aol/nfx.json
-	@echo '			"Name": "aol"'                                   >> dist/aol/nfx.json
-	@echo '		},'                                                  >> dist/aol/nfx.json
-	@echo '		{'                                                   >> dist/aol/nfx.json
-	@echo '			"Os": ["windows"],'                              >> dist/aol/nfx.json
-	@echo '			"Arch": ["x86_64"],'                             >> dist/aol/nfx.json
-	@echo '			"Path": "aol_windows_x86_64.exe",'               >> dist/aol/nfx.json
-	@echo '			"Name": "aol"'                                   >> dist/aol/nfx.json
-	@echo '		},'                                                  >> dist/aol/nfx.json
-	@echo '		{'                                                   >> dist/aol/nfx.json
-	@echo '			"Os": ["macos"],'                                >> dist/aol/nfx.json
-	@echo '			"Arch": ["arm64"],'                              >> dist/aol/nfx.json
-	@echo '			"Path": "aol_macos_arm64",'                      >> dist/aol/nfx.json
-	@echo '			"Name": "aol"'                                   >> dist/aol/nfx.json
-	@echo '		}'                                                   >> dist/aol/nfx.json
-	@echo '	]'                                                       >> dist/aol/nfx.json
-	@echo '}'                                                        >> dist/aol/nfx.json
 
 clean:
 	rm -rf build dist
